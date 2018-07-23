@@ -53,3 +53,8 @@ if (token) {
 //     cluster: 'mt1',
 //     encrypted: true
 // });
+
+/**
+ * Load jimp
+ */
+import Jimp from 'jimp/browser/lib/jimp'
