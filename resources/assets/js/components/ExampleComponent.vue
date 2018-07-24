@@ -7,6 +7,7 @@
       <button @click="loadImage">LOAD</button>
     </div>
     <div><button @click="text_noto">NOTO</button> <button @click="text_mincho">MINCHO</button></div>
+    <div><button @click="upload">UPLOAD</button></div>
   </div>
 </template>
 
@@ -20,7 +21,8 @@
         originalImage: null,
         srcImage: null,
         overlayImage: null,
-        imgNode: null
+        imgNode: null,
+        imgData64: null
       }
     },
     mounted () {
@@ -31,6 +33,7 @@
           .getBase64(Jimp.MIME_PNG, function (err, src) {
             this.imgNode = document.createElement('img')
             this.imgNode.setAttribute('src', src)
+            this.imgData64 = src
 
             let target = document.getElementById('my_target')
             target.appendChild(this.imgNode)
@@ -49,6 +52,7 @@
           lenna.resize(700, 468)
             .getBase64(Jimp.MIME_PNG, function (err, src) {
               this.imgNode.setAttribute('src', src)
+              this.imgData64 = src
               err && console.log(err)
             }.bind(this))
         }.bind(this)).catch(function (err) {
@@ -62,6 +66,7 @@
             .composite(text, 0, 0)
             .getBase64(Jimp.MIME_PNG, function (err, src) {
               this.imgNode.setAttribute('src', src)
+              this.imgData64 = src
               err && console.log(err)
             }.bind(this))
         }.bind(this)).catch(function (err) {
@@ -75,11 +80,23 @@
             .composite(text, 0, 0)
             .getBase64(Jimp.MIME_PNG, function (err, src) {
               this.imgNode.setAttribute('src', src)
+              this.imgData64 = src
               err && console.log(err)
             }.bind(this))
         }.bind(this)).catch(function (err) {
           console.error(err)
         })
+      },
+      upload: function() {
+        let params = new URLSearchParams()
+        params.append('img', this.imgData64)
+        this.$http.post('/api/file/save', params)
+          .then(res =>  {
+            console.log('upload completed')
+          })
+          .catch(error => {
+            console.log('error')
+          });
       }
     }
   }

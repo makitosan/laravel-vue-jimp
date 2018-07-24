@@ -1038,28 +1038,19 @@ module.exports = __webpack_require__(47);
 
 /***/ }),
 /* 11 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_vue__);
 
-/**
- * First we will load all of this project's JavaScript dependencies which
- * includes Vue and other libraries. It is a great starting point when
- * building robust, powerful web applications using Vue and Laravel.
- */
 
 __webpack_require__(12);
 
-window.Vue = __webpack_require__(42);
+__WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('example-component', __webpack_require__(43));
 
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
-
-Vue.component('example-component', __webpack_require__(43));
-
-var app = new Vue({
+var app = new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
   el: '#app'
 });
 
@@ -1069,8 +1060,11 @@ var app = new Vue({
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jimp_browser_lib_jimp__ = __webpack_require__(36);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_jimp_browser_lib_jimp___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_jimp_browser_lib_jimp__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue__ = __webpack_require__(42);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_vue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jimp_browser_lib_jimp__ = __webpack_require__(36);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_jimp_browser_lib_jimp___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_jimp_browser_lib_jimp__);
+
 
 window._ = __webpack_require__(13);
 
@@ -1095,6 +1089,8 @@ try {
 window.axios = __webpack_require__(17);
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+__WEBPACK_IMPORTED_MODULE_0_vue___default.a.prototype.$http = window.axios;
 
 /**
  * Next we will register the CSRF Token as a common header with Axios so that
@@ -49300,6 +49296,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'Composite',
@@ -49310,7 +49307,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       originalImage: null,
       srcImage: null,
       overlayImage: null,
-      imgNode: null
+      imgNode: null,
+      imgData64: null
     };
   },
   mounted: function mounted() {
@@ -49320,6 +49318,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       lenna.resize(700, 468).getBase64(Jimp.MIME_PNG, function (err, src) {
         this.imgNode = document.createElement('img');
         this.imgNode.setAttribute('src', src);
+        this.imgData64 = src;
 
         var target = document.getElementById('my_target');
         target.appendChild(this.imgNode);
@@ -49338,6 +49337,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.srcImage = lenna;
         lenna.resize(700, 468).getBase64(Jimp.MIME_PNG, function (err, src) {
           this.imgNode.setAttribute('src', src);
+          this.imgData64 = src;
           err && console.log(err);
         }.bind(this));
       }.bind(this)).catch(function (err) {
@@ -49349,6 +49349,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.srcImage = this.originalImage.clone();
         this.srcImage.resize(700, 468).composite(text, 0, 0).getBase64(Jimp.MIME_PNG, function (err, src) {
           this.imgNode.setAttribute('src', src);
+          this.imgData64 = src;
           err && console.log(err);
         }.bind(this));
       }.bind(this)).catch(function (err) {
@@ -49360,10 +49361,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         this.srcImage = this.originalImage.clone();
         this.srcImage.resize(700, 468).composite(text, 0, 0).getBase64(Jimp.MIME_PNG, function (err, src) {
           this.imgNode.setAttribute('src', src);
+          this.imgData64 = src;
           err && console.log(err);
         }.bind(this));
       }.bind(this)).catch(function (err) {
         console.error(err);
+      });
+    },
+    upload: function upload() {
+      var params = new URLSearchParams();
+      params.append('img', this.imgData64);
+      this.$http.post('/api/file/save', params).then(function (res) {
+        console.log('upload completed');
+      }).catch(function (error) {
+        console.log('error');
       });
     }
   }
@@ -49809,7 +49820,9 @@ var render = function() {
       _c("button", { on: { click: _vm.text_noto } }, [_vm._v("NOTO")]),
       _vm._v(" "),
       _c("button", { on: { click: _vm.text_mincho } }, [_vm._v("MINCHO")])
-    ])
+    ]),
+    _vm._v(" "),
+    _c("div", [_c("button", { on: { click: _vm.upload } }, [_vm._v("UPLOAD")])])
   ])
 }
 var staticRenderFns = []
