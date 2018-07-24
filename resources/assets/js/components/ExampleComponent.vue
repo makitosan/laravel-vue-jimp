@@ -18,22 +18,21 @@
       return {
         msg: 'Welcome to Your Vue.js App',
         srcUrl: null,
-        originalImage: null,
+        originalImage: null, // not-resized original image
+        originalOverlayImage: null, // no-resized overlay image
         srcImage: null,
-        overlayImage: null,
-        imgNode: null,
-        imgData64: null
+        imgNode: null
       }
     },
     mounted () {
       Jimp.read('./images/example_01.jpg').then(function (lenna) {
+        console.log('w:' + lenna.bitmap.width + ' h:' + lenna.bitmap.height)
         this.originalImage = lenna.clone()
         this.srcImage = lenna
-        lenna.resize(700, 468)
+        lenna.resize(350, 234)
           .getBase64(Jimp.MIME_PNG, function (err, src) {
             this.imgNode = document.createElement('img')
             this.imgNode.setAttribute('src', src)
-            this.imgData64 = src
 
             let target = document.getElementById('my_target')
             target.appendChild(this.imgNode)
@@ -49,10 +48,10 @@
         Jimp.read(this.srcUrl).then(function (lenna) {
           this.originalImage = lenna.clone()
           this.srcImage = lenna
-          lenna.resize(700, 468)
+          lenna.resize(350, 234)
             .getBase64(Jimp.MIME_PNG, function (err, src) {
               this.imgNode.setAttribute('src', src)
-              this.imgData64 = src
+
               err && console.log(err)
             }.bind(this))
         }.bind(this)).catch(function (err) {
@@ -60,43 +59,44 @@
         })
       },
       text_noto: function () {
-        Jimp.read('./images/notosanscjkjp_black_700x468.png').then(function (text) {
-          this.srcImage = this.originalImage.clone()
-          this.srcImage.resize(700, 468)
-            .composite(text, 0, 0)
-            .getBase64(Jimp.MIME_PNG, function (err, src) {
-              this.imgNode.setAttribute('src', src)
-              this.imgData64 = src
-              err && console.log(err)
-            }.bind(this))
-        }.bind(this)).catch(function (err) {
-          console.error(err)
-        })
+        this.overlay('./images/notosanscjkjp_black_700x468.png')
       },
       text_mincho: function () {
-        Jimp.read('./images/genkai_mincho_700x468.png').then(function (text) {
+        this.overlay('./images/genkai_mincho_700x468.png')
+      },
+      overlay: function(url) {
+        Jimp.read(url).then(function (text) {
+          this.originalOverlayImage = text.clone()
           this.srcImage = this.originalImage.clone()
-          this.srcImage.resize(700, 468)
-            .composite(text, 0, 0)
+          this.srcImage.resize(350, 234)
+          text.resize(350, 234)
+
+          this.srcImage.composite(text, 0, 0)
             .getBase64(Jimp.MIME_PNG, function (err, src) {
               this.imgNode.setAttribute('src', src)
-              this.imgData64 = src
+
               err && console.log(err)
             }.bind(this))
         }.bind(this)).catch(function (err) {
           console.error(err)
         })
+
       },
       upload: function() {
-        let params = new URLSearchParams()
-        params.append('img', this.imgData64)
-        this.$http.post('/api/file/save', params)
-          .then(res =>  {
-            console.log('upload completed')
-          })
-          .catch(error => {
-            console.log('error')
-          });
+        let original = this.originalImage.clone()
+        let overlay = this.originalOverlayImage.clone()
+        original.composite(overlay, 0, 0)
+          .getBase64(Jimp.MIME_PNG, function (err, src) {
+            let params = new URLSearchParams()
+            params.append('img', src)
+            this.$http.post('/api/file/save', params)
+              .then(res =>  {
+                console.log('upload completed')
+              })
+              .catch(error => {
+                console.log('error')
+              });
+          }.bind(this))
       }
     }
   }
